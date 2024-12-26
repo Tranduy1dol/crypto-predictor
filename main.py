@@ -43,7 +43,7 @@ class Trade:
         bought = True
         while True:
             if (datetime.now().hour % 4 == 0) or first:
-                self.trading_info.insert(tk.END, "Balance:" + str(balance_of(self.client, "USDT")))
+                # self.trading_info.insert(tk.END, "Balance:" + str(balance_of(self.client, "USDT")))
                 df = gather_data(symbols)
                 states = get_states(df)
                 print(states)
@@ -51,11 +51,11 @@ class Trade:
                 self.trading_info.insert(tk.END, str(states) + '\n\n')
 
                 if states == 'uptrend' and bought == True:
-                    take_sell_order(self.client, symbols, 10, 0.5)
+                    take_buy_order(self.client, symbols, 'SELL', 0.5)
                     self.trading_info.insert(tk.END, "Bought at price :" + str(df['close'].iloc[-1]) + '\n')
                     bought = False
                 if states == 'downtrend' and bought == False:
-                    take_sell_order(self.client, symbols, 10, 0.5)
+                    take_sell_order(self.client, symbols, 'BUY', 0.5)
                     self.trading_info.insert(tk.END, "Sold at price :" + str(df['close'].iloc[-1]) + '\n\n')
                     bought = True
                 first = False
