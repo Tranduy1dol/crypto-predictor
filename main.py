@@ -1,85 +1,47 @@
-import tkinter as tk
+import argparse
 
-from libs.exchange import *
-from libs.process import *
+def train(input_path, output_model_path):
+    # Placeholder for training logic
+    print(f"Training model with input: {input_path}, saving to: {output_model_path}")
+    # ...logic to train the model...
 
-def login():
-    public_key = public_key_entry.get()
-    private_key = private_key_entry.get()
+def test(data_test_path, model_path):
+    # Placeholder for testing logic
+    print(f"Testing model with test data: {data_test_path}, using model: {model_path}")
+    # ...logic to test the model...
 
-    Trade.open_trading_window(Trade(public_key, private_key))
+def predict(input_data_path, model_path):
+    # Placeholder for prediction logic
+    print(f"Making predictions with input: {input_data_path}, using model: {model_path}")
+    # ...logic to make predictions...
 
+def main():
+    parser = argparse.ArgumentParser(description="Command-line tool for model training, testing, and prediction.")
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
-class Trade:
-    """
-    Base class for trading
-    """
+    # Train command
+    train_parser = subparsers.add_parser("train", help="Train a model")
+    train_parser.add_argument("--input", required=True, help="Path to the training data")
+    train_parser.add_argument("--output", required=True, help="Path to save the trained model")
 
-    def __init__(self, public_key, private_key):
-        self.trading_info = None
-        self.client = check_login(public_key, private_key)
+    # Test command
+    test_parser = subparsers.add_parser("test", help="Test a model")
+    test_parser.add_argument("--data-test", required=True, help="Path to the test data")
+    test_parser.add_argument("--model", required=True, help="Path to the model file")
 
-    def open_trading_window(self):
-        trading_window = tk.Toplevel(root)
-        trading_window.title("Trading BOT")
-        trading_window.geometry("800x600")
-        label = tk.Label(trading_window, text="Welcome to BOT ")
-        client = self.client
-        label.pack()
+    # Predict command
+    predict_parser = subparsers.add_parser("predict", help="Make predictions using a model")
+    predict_parser.add_argument("--input", required=True, help="Path to the input data for prediction")
+    predict_parser.add_argument("--model", required=True, help="Path to the model file")
 
-        symbol_label = tk.Label(trading_window, text="Symbol")
-        symbol_entry = tk.Entry(trading_window)
-        symbol = symbol_entry.get()
-        trade_button = tk.Button(trading_window, text="Trade", command=lambda: self.trading(symbol_entry.get()))
-        trade_button.pack()
-        symbol_label.pack()
-        symbol_entry.pack()
-        self.trading_info = tk.Text(trading_window)
-        self.trading_info.pack()
+    args = parser.parse_args()
 
-    def trading(self, symbols):
-        print(symbols)
-        first = True
-        bought = True
-        while True:
-            if (datetime.now().hour % 4 == 0) or first:
-                # self.trading_info.insert(tk.END, "Balance:" + str(balance_of(self.client, "USDT")))
-                df = gather_data(symbols)
-                states = get_states(df)
-                print(states)
-                self.trading_info.insert(tk.END, 'Current state of the market:\n')
-                self.trading_info.insert(tk.END, str(states) + '\n\n')
+    if args.command == "train":
+        train(args.input, args.output)
+    elif args.command == "test":
+        test(args.data_test, args.model)
+    elif args.command == "predict":
+        predict(args.input, args.model)
 
-                if states == 'uptrend' and bought == True:
-                    take_buy_order(self.client, symbols, 'SELL', 0.5)
-                    self.trading_info.insert(tk.END, "Bought at price :" + str(df['close'].iloc[-1]) + '\n')
-                    bought = False
-                if states == 'downtrend' and bought == False:
-                    take_sell_order(self.client, symbols, 'BUY', 0.5)
-                    self.trading_info.insert(tk.END, "Sold at price :" + str(df['close'].iloc[-1]) + '\n\n')
-                    bought = True
-                first = False
-
-
-# Create login screen
-root = tk.Tk()
-root.title("Login Window")
-
-public_key_label = tk.Label(root, text="Public Key")
-private_key_label = tk.Label(root, text="Private Key")
-
-# Create entry fields
-public_key_entry = tk.Entry(root)
-private_key_entry = tk.Entry(root)
-
-# Create login button
-login_button = tk.Button(root, text="Login", command=login)
-
-# Grid layout
-public_key_label.grid(row=0, column=0)
-public_key_entry.grid(row=0, column=1)
-private_key_label.grid(row=1, column=0)
-private_key_entry.grid(row=1, column=1)
-login_button.grid(row=2, column=1)
-
-root.mainloop()
+if __name__ == "__main__":
+    main()
