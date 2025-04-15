@@ -1,19 +1,23 @@
 import argparse
 
+
 def train(input_path, output_model_path):
     # Placeholder for training logic
     print(f"Training model with input: {input_path}, saving to: {output_model_path}")
     # ...logic to train the model...
+
 
 def test(data_test_path, model_path):
     # Placeholder for testing logic
     print(f"Testing model with test data: {data_test_path}, using model: {model_path}")
     # ...logic to test the model...
 
+
 def predict(input_data_path, model_path):
     # Placeholder for prediction logic
     print(f"Making predictions with input: {input_data_path}, using model: {model_path}")
     # ...logic to make predictions...
+
 
 def main():
     parser = argparse.ArgumentParser(description="Command-line tool for model training, testing, and prediction.")
@@ -42,6 +46,7 @@ def main():
         test(args.data_test, args.model)
     elif args.command == "predict":
         predict(args.input, args.model)
+
 
 if __name__ == "__main__":
     main()
