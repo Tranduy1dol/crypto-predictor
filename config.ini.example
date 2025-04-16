@@ -1,0 +1,9 @@
+[CONFIG]
+model = lstm
+mode = simple
+window_size = 30
+symbol = BTC
+start = Jun 01 2018
+end = Dec 31 2023
+scaler_path = ./.scaler/scaler.pkl
+model_path = ./.model/model.keras

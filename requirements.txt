@@ -1,0 +1,11 @@
+joblib~=1.4.2
+numpy~=1.26.4
+pandas~=2.2.3
+ta~=0.10.2
+tensorflow~=2.17.0
+scikit-learn~=1.6.1
+keras~=3.6.0
+matplotlib~=3.10.1
+typer~=0.15.2
+typing_extensions~=4.12.2
+setuptools~=75.8.0
