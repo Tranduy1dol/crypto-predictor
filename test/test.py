@@ -28,7 +28,12 @@ class TestTrainAndTest(unittest.TestCase):
 
         # Test the model
         model.test(test_processed, scaler_path, features)
-        model.result()
+        mape, rmse = model.result()
+
+        self.assertIsNotNone(mape, "Model should return prediction results")
+        self.assertIsNotNone(rmse, "Model should return prediction results")
+
+        print(f"MAPE: {mape:.4f} | RMSE: {rmse:.4f}")
 
 if __name__ == '__main__':
     unittest.main()
