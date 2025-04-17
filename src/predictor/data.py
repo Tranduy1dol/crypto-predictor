@@ -188,10 +188,12 @@ def normalize(dataset, path, feature):
     y = dataset.filter(['close']).values
     x = dataset[feature].values
 
-    scaler = MinMaxScaler(feature_range=(0, 1))
-    x = scaler.fit_transform(x)
-    y = scaler.fit_transform(y)
-    joblib.dump(scaler, path)
+    scaler_x = MinMaxScaler(feature_range=(0, 1))
+    scaler_y = MinMaxScaler(feature_range=(0, 1))
+
+    x = scaler_x.fit_transform(x)
+    y = scaler_y.fit_transform(y)
+    joblib.dump((scaler_x, scaler_y), path)
 
     return x, y
 
