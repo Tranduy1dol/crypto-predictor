@@ -17,7 +17,37 @@ This project is part of my learning journey to explore suitable models for predi
 - Python 3.x
 - Any necessary dependencies. See the `requirements.txt` file for a list of required packages.
 
-## Installation
+### Installing TA-Lib
+
+---
+TA-Lib requires special installation steps:
+
+#### On Windows:
+
+---
+Download and install the wheel from [unofficial Windows binaries](https://www.lfd.uci.edu/~gohlke/pythonlibs/#ta-lib)
+
+#### On macOS:
+
+---
+```bash
+brew install ta-lib
+pip install ta-lib
+```
+
+#### On Linux:
+
+---
+```bash
+wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
+tar -xzf ta-lib-0.4.0-src.tar.gz
+cd ta-lib/
+./configure --prefix=/usr
++make
+sudo make install
+pip install ta-lib
+```
+# Installation
 ```bash
 pip install -e .
 ```
@@ -35,7 +65,7 @@ Available commands:
 - new      : Initialize a new project setup.
 ```
 
-First, create your `config.ini` and fill in the required fields. You can use the `new` command to create a new model with a sample configuration file.
+First, create your `config.ini` and fill in the required fields. You can use the provided `config.ini.example` as a template. Then use the `new` command to create a new model with your configuration file.
 ```
 predictor new config.ini
 ```
