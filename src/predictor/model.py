@@ -37,14 +37,14 @@ class Model:
             model = Sequential()
 
         match self.model_type.value:
-            case 1:
+            case 'lstm':
                 model.add(LSTM(256, return_sequences=True, input_shape=(x_train.shape[1], x_train.shape[2])))
                 model.add(LSTM(64, return_sequences=False))
-            case 2:
+            case 'bi_lstm':
                 model.add(
                     Bidirectional(LSTM(256, return_sequences=True, input_shape=(x_train.shape[1], x_train.shape[2]))))
                 model.add(Bidirectional(LSTM(64, return_sequences=False)))
-            case 3:
+            case 'gru':
                 model.add(GRU(256, return_sequences=True, input_shape=(x_train.shape[1], x_train.shape[2])))
                 model.add(GRU(64, return_sequences=False))
 
@@ -65,7 +65,7 @@ class Model:
         x_test_zero_time = x_test[idx]
 
         scaler = joblib.load(scaler_path)
-        x_test = scaler.fit_transform(x_test_zero_time)
+        x_test = scaler.transfrom(x_test_zero_time)
 
         x_test_sliding = []
         y_test_label = []
@@ -112,3 +112,4 @@ class Model:
 
         plt.tight_layout()
         plt.show()
+        return mape, rmse
