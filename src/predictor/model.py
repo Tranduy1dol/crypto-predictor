@@ -10,29 +10,44 @@ from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
 
 
 class ModelType(Enum):
+    """
+    Enum for different types of models.
+    """
     LSTM = 'lstm'
     GRU = 'gru'
     BI_LSTM = 'bi_lstm'
 
 
 def setup():
+    """
+    Configures TensorFlow to use GPU with memory growth.
+    """
     gpus = tf.config.list_physical_devices('GPU')
     if gpus:
         tf.config.experimental.set_memory_growth(gpus[0], True)
 
 
-def save_model(model, path):
-    model.save(path)
-
-
 class Model:
+    """
+    A class to define, train, test, and evaluate machine learning models.
+    """
+
     def __init__(self, model_type: ModelType):
+        # Initialize model attributes
         self.model_type = model_type
         self.model = None
         self.y_pred = None
         self.y_test_label = None
 
     def train(self, x_train, y_train, path):
+        """
+        Trains the model using the provided training data.
+
+        Args:
+            x_train (ndarray): Training features.
+            y_train (ndarray): Training targets.
+            path (str): Path to save the trained model.
+        """
         with tf.device('/GPU:0'):
             model = Sequential()
 
@@ -57,6 +72,15 @@ class Model:
         model.save(path)
 
     def test(self, test_data, scaler_path, feature, window_size=30):
+        """
+        Tests the model on the test dataset.
+
+        Args:
+            test_data (DataFrame): Test dataset.
+            scaler_path (str): Path to the scaler file.
+            feature (list): List of feature columns.
+            window_size (int): Size of the sliding window.
+        """
         x_test = test_data[feature].values
         y_test = test_data.filter(['close']).values
 
@@ -64,8 +88,8 @@ class Model:
 
         x_test_zero_time = x_test[idx]
 
-        scaler = joblib.load(scaler_path)
-        x_test = scaler.transfrom(x_test_zero_time)
+        scaler_x, scaler_y = joblib.load(scaler_path)
+        x_test = scaler_x.transform(x_test_zero_time)
 
         x_test_sliding = []
         y_test_label = []
@@ -79,15 +103,20 @@ class Model:
         x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], x_test.shape[2]))
 
         y_pred = self.model.predict(x_test)
-
-        placeholder = np.zeros((y_pred.shape[0], scaler.n_features_in_))
-        placeholder[:, 0] = y_pred[:, 0, 0]
-        placeholder = scaler.inverse_transform(placeholder)
-        y_pred = placeholder[:, 0]
+        y_pred = scaler_y.inverse_transform(y_pred)
 
         self.y_pred, self.y_test_label = y_pred, y_test_label
 
     def result(self, title="Model Test Result"):
+        """
+        Displays the test results and evaluation metrics.
+
+        Args:
+            title (str): Title for the result plot.
+
+        Returns:
+            tuple: MAPE and RMSE metrics.
+        """
         y_pred = np.array(self.y_pred).flatten()
         y_true = np.array(self.y_test_label).flatten()
 

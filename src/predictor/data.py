@@ -13,6 +13,17 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 def transform(x, y, window_size=30):
+    """
+    Transforms the input data into sequences of a specified window size for training.
+
+    Args:
+        x (ndarray): Input features.
+        y (ndarray): Target values.
+        window_size (int): Size of the sliding window.
+
+    Returns:
+        tuple: Transformed x and y tensors.
+    """
     x_train = []
     y_train = []
 
@@ -32,6 +43,15 @@ def transform(x, y, window_size=30):
 
 
 def simple_process(data):
+    """
+    Processes the dataset to compute basic technical indicators.
+
+    Args:
+        data (DataFrame): Input dataset.
+
+    Returns:
+        tuple: Processed dataset and list of selected features.
+    """
     dataset = data.loc[:, ['time', 'open', 'high', 'low', 'close', 'volume']]
 
     dataset['rsi'] = momentum.RSIIndicator(dataset['close']).rsi()
@@ -66,6 +86,15 @@ def simple_process(data):
 
 
 def complex_process(data):
+    """
+    Processes the dataset to compute a comprehensive set of technical indicators.
+
+    Args:
+        data (DataFrame): Input dataset.
+
+    Returns:
+        tuple: Processed dataset and list of selected features.
+    """
     dataset = data.loc[:, ['time', 'open', 'high', 'low', 'close', 'volume']]
 
     open = dataset['open']
@@ -185,6 +214,17 @@ def complex_process(data):
 
 
 def normalize(dataset, path, feature):
+    """
+    Normalizes the dataset features and target values using MinMaxScaler.
+
+    Args:
+        dataset (DataFrame): Input dataset.
+        path (str): Path to save the scalers.
+        feature (list): List of feature column names.
+
+    Returns:
+        tuple: Normalized feature and target arrays.
+    """
     y = dataset.filter(['close']).values
     x = dataset[feature].values
 
@@ -199,7 +239,26 @@ def normalize(dataset, path, feature):
 
 
 class Data:
+    """
+    Represents the data handling and processing pipeline for a specific symbol.
+
+    Attributes:
+        symbol (str): The trading symbol (e.g., BTC).
+        start_str (str): Start date for data retrieval.
+        end_str (str): End date for data retrieval.
+        mode (str): Processing mode ('simple' or 'complex').
+    """
+
     def __init__(self, symbol, start, end, mode):
+        """
+        Initializes the Data object with symbol, date range, and processing mode.
+
+        Args:
+            symbol (str): Trading symbol.
+            start (str): Start date.
+            end (str): End date.
+            mode (str): Processing mode ('simple' or 'complex').
+        """
         self.data = None
         self.features = None
         self.symbol = symbol
@@ -208,6 +267,9 @@ class Data:
         self.mode = mode
 
     def load(self):
+        """
+        Loads historical data for the specified symbol and date range.
+        """
         client = Client("", "")
         klines = client.get_historical_klines(
             symbol=f'{self.symbol}USDT',
@@ -220,12 +282,18 @@ class Data:
         data_frames = data_frames.iloc[:, :6]
         data_frames.columns = ['time', 'open', 'high', 'low', 'close', 'volume']
         data_frames = data_frames.astype(float)
-        data_frames['time'] = pd.to_datetime(data_frames['time'])
-        data_frames.dropna()
+        data_frames['time'] = pd.to_datetime(data_frames['time'].astype("int64"), unit="ms")
+        data_frames.dropna(inplace=True)
 
         self.data = data_frames
 
     def split(self):
+        """
+        Splits the dataset into training and testing sets.
+
+        Returns:
+            tuple: Training and testing datasets.
+        """
         data = self.data
 
         train_size = int(len(data) * 0.8)
@@ -234,11 +302,32 @@ class Data:
         return train_data, test_data
 
     def get_features(self):
+        """
+        Retrieves the processed feature list.
+
+        Returns:
+            list: List of feature names.
+
+        Raises:
+            ValueError: If features have not been processed yet.
+        """
         if self.features is None:
             raise ValueError("Features have not been processed yet.")
         return self.features
 
     def process(self, data):
+        """
+        Processes the dataset based on the specified mode.
+
+        Args:
+            data (DataFrame): Input dataset.
+
+        Returns:
+            DataFrame: Processed dataset.
+
+        Raises:
+            ValueError: If an invalid mode is specified.
+        """
         if self.mode == 'simple':
             data, features = simple_process(data)
             self.features = features
@@ -252,31 +341,42 @@ class Data:
 
 
 def make_prediction(model_path, symbol, scaler_path, window_size, mode):
+    """
+    Makes a prediction for the closing price of a symbol using a trained model.
+
+    Args:
+        model_path (str): Path to the trained model.
+        symbol (str): Trading symbol.
+        scaler_path (str): Path to the saved scalers.
+        window_size (int): Size of the input window for the model.
+        mode (str): Processing mode ('simple' or 'complex').
+
+    Returns:
+        float: Predicted closing price.
+    """
+    model = tf.keras.models.load_model(model_path)
+    model_input_shape = model.input_shape  # (None, timesteps, features)
+    window_size = model_input_shape[1]
+
     today = datetime.date.today().strftime('%b %d %Y')
+
     dataset = Data(symbol, 'Jan 01 2018', today, mode)
     dataset.load()
     processed_data = dataset.process(dataset.data)
 
-    scaler = joblib.load(scaler_path)
+    scaler_x, scaler_y = joblib.load(scaler_path)
     x = processed_data[dataset.get_features()].values
-    x = scaler.fit_transform(x)
+    x = scaler_x.transform(x)
 
     x_input = x[-window_size:]
+
+    if x_input.shape[0] != window_size:
+        raise ValueError(f"Not enough data to make predict. Need {window_size} rows, but {x_input.shape[0]} rows.")
+
     x_input = np.expand_dims(x_input, axis=0)
 
-    # Load the model and ensure input shape compatibility
-    model = tf.keras.models.load_model(model_path)
-    model_input_shape = model.input_shape  # Get the expected input shape of the model
-
-    # Ensure x_input matches the expected input shape
-    if len(model_input_shape) == 3 and model_input_shape[1] is not None:
-        x_input = np.reshape(x_input, (1, model_input_shape[1], model_input_shape[2]))
-
     prediction = model.predict(x_input)
-
-    # Adjust the inverse transform to match the scaler's expected input
-    placeholder = np.zeros((prediction.shape[0], x.shape[1]))
-    placeholder[:, 0] = prediction[:, 0, 0]
-    predicted_close = scaler.inverse_transform(placeholder)[0, 0]
+    pred_value = prediction.reshape(-1, 1)
+    predicted_close = scaler_y.inverse_transform(pred_value)[0, 0]
 
     return predicted_close

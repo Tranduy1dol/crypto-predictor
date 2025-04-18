@@ -1,11 +1,17 @@
 from configparser import ConfigParser
+from datetime import datetime
 
 from .data import Data, normalize, transform, make_prediction
 from .model import Model, ModelType, setup
 
 
 class Parser:
+    """
+    A class to parse and store configuration settings from a config file.
+    """
+
     def __init__(self):
+        # Initialize configuration attributes
         self.model_path = None
         self.scaler_path = None
         self.symbol = None
@@ -16,23 +22,33 @@ class Parser:
         self.end = None
 
     def read_config_file(self, path):
+        """
+        Reads and parses the configuration file.
+
+        Args:
+            path (str): Path to the configuration file.
+        """
         config_object = ConfigParser()
         config_object.read(path)
-
         config = config_object['CONFIG']
-
-        self.model_path = config['model_path']
-        self.scaler_path = config['scaler_path']
-        self.symbol = config['symbol']
-        self.window_size = int(config['window_size'])
-        self.model = config['model']
-        self.mode = config['mode']
-        self.end = config['end']
-        self.start = config['start']
-        self.symbol = config['symbol']
+        today_str = datetime.today().strftime('%b %d %Y')
+        self.model_path = config.get('model_path', './.model/model.keras') or './.model/model.keras'
+        self.scaler_path = config.get('scaler_path', './.scaler/scaler.pkl') or './.scaler/scaler.pkl'
+        self.symbol = config.get('symbol', 'BTC') or 'BTC'
+        self.window_size = int(config.get('window_size', 30) or 30)
+        self.model = config.get('model', 'lstm') or 'lstm'
+        self.mode = config.get('mode', 'simple') or 'simple'
+        self.end = config.get('end', today_str) or today_str
+        self.start = config.get('start', 'Jun 01 2018') or 'Jun 01 2018'
 
 
 def train_and_test(config_path):
+    """
+    Trains and tests the model based on the configuration file.
+
+    Args:
+        config_path (str): Path to the configuration file.
+    """
     # Parse the configuration file
     parser = Parser()
     parser.read_config_file(config_path)
@@ -62,6 +78,12 @@ def train_and_test(config_path):
 
 
 def predict(config_path):
+    """
+    Makes a prediction using the trained model.
+
+    Args:
+        config_path (str): Path to the configuration file.
+    """
     # Parse the configuration file
     parser = Parser()
     parser.read_config_file(config_path)
