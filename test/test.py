@@ -1,5 +1,6 @@
 import unittest
 
+from predictor.data import make_prediction
 from src.predictor.data import Data, normalize, transform
 from src.predictor.model import setup, ModelType, Model
 
@@ -34,6 +35,8 @@ class TestTrainAndTest(unittest.TestCase):
         self.assertIsNotNone(rmse, "Model should return prediction results")
 
         print(f"MAPE: {mape:.4f} | RMSE: {rmse:.4f}")
+
+        print(f"predicted results: {make_prediction(model_path, 'BTC', scaler_path, 10, 'simple')}")
 
 if __name__ == '__main__':
     unittest.main()
