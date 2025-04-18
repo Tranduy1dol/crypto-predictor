@@ -22,12 +22,12 @@ This project is part of my learning journey to explore suitable models for predi
 ---
 TA-Lib requires special installation steps:
 
-#### On Windows:
+#### On Windows
 
 ---
 Download and install the wheel from [unofficial Windows binaries](https://www.lfd.uci.edu/~gohlke/pythonlibs/#ta-lib)
 
-#### On macOS:
+#### On macOS
 
 ---
 ```bash
@@ -35,7 +35,7 @@ brew install ta-lib
 pip install ta-lib
 ```
 
-#### On Linux:
+#### On Linux
 
 ---
 ```bash
@@ -72,7 +72,7 @@ First, create your `config.ini` and fill in the required fields. You can use the
 ```bash
 predictor new config.ini
 ```
-After trained the model, you can use the `predict` command to make predictions.
+After training the model, you can use the `predict` command to make predictions.
 ```bash
 predictor predict config.ini
 ```
