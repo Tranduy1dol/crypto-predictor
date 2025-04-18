@@ -1,0 +1,23 @@
+[project]
+name = "predictor"
+version = "0.1.0"
+description = "CLI tool for crypto price prediction"
+authors = [
+    { name="Tranduy1dol", email="tmd.id2004@gmail.com" }
+]
+dependencies = [
+    "tensorflow",
+    "pandas",
+    "numpy",
+    "scikit-learn",
+    "joblib",
+    "matplotlib",
+    "typer",
+    "ta",
+    "ta-lib",
+    "python-binance"
+]
+
+[project.scripts]
+predictor = "predictor.cli:app"
+
