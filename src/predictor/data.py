@@ -1,4 +1,5 @@
 import datetime
+import os
 
 import joblib
 import numpy as np
@@ -233,6 +234,8 @@ def normalize(dataset, path, feature):
 
     x = scaler_x.fit_transform(x)
     y = scaler_y.fit_transform(y)
+
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     joblib.dump((scaler_x, scaler_y), path)
 
     return x, y
