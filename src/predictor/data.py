@@ -206,7 +206,7 @@ def complex_process(data):
         'stochf_fastk', 'ultosc', 'willr', 'ht_dcperiod', 'ht_dcphase', 'ht_phasor_inphase', 'ht_phasor_quadrature',
         'ht_trendline', 'beta', 'linearreg', 'linearreg_angle',
         'linearreg_intercept', 'linearreg_slope', 'stddev', 'bbands_upperband', 'bbands_middleband', 'bbands_lowerband',
-        'dema', 'ema', 'ht_trendline', 'kama', 'ma', 'midpoint', 't3', 'tema', 'trima', 'wma',
+        'dema', 'ema', 'kama', 'ma', 'midpoint', 't3', 'tema', 'trima', 'wma',
     ]
 
     dataset.dropna(inplace=True)
